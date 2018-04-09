@@ -15,6 +15,35 @@ def int2addr(i):
     return inet_ntoa(pack('>I', i))
 
 @attr.s
+class network(object):
+    vlan = attr.ib()
+    desc = attr.ib()
+    netaddr = attr.ib()
+    netmask = attr.ib()
+
+    def _getnet_(self):
+        inetaddr = addr2int(self.netaddr)
+        ip = int2addr(inetaddr + 1)
+        sbip = int2addr(inetaddr + 2)
+        mask = calcDottedNetmask(self.netmask)
+        return { 'ip' : ip,
+                 'sbip' : sbip,
+                 'mask' : mask,
+        }
+
+    def getCiscoFWConfig(self, intname, dhcpserver):
+        ints = []
+        ints.append('interface {}.{}'.format(intname,self.vlan))
+        ints.append('  vlan {}'.format(self.vlan))
+        ints.append('  description {}'.format(self.desc))
+        ints.append('  nameif {}'.format(self.desc))
+        ints.append('  dhcprelay server {}'.format(dhcpserver))
+        ints.append('  ip address {ip} {mask} standby {sbip}'.format(**self._getnet_()))
+        ints.append('  exit')
+        return ints
+
+
+@attr.s
 class iacnet(object):
     fwint = attr.ib()
     swint = attr.ib()
@@ -23,25 +52,17 @@ class iacnet(object):
     dhcpserver = attr.ib()
     basevlan = attr.ib(default=100)
     netbits = attr.ib(default=3)
-    ciscofw = []
-    ciscoswitch = []
+    nets = []
 
     def createVlanInt(self, vlan, name):
-        ints= []
         ibasenet = addr2int(self.basenet)
         inetaddr = ibasenet + (vlan - self.basevlan) * self.netbits ** 2
-        ip = int2addr(inetaddr + 1)
-        sbip = int2addr(inetaddr + 2)
-        mask = calcDottedNetmask(32 - self.netbits)
-        ints.append('interface {}.{}'.format(self.fwint,vlan))
-        ints.append('  vlan {}'.format(vlan))
-        ints.append('  description {}'.format(name))
-        ints.append('  nameif {}'.format(name))
-        ints.append('  dhcprelay server {}'.format(self.dhcpserver))
-        ints.append('  ip address {} {} standby {}'.format(ip, mask, sbip))
-        ints.append('  exit')
-        self.ciscofw.extend(ints)
+        n = network(vlan, name, int2addr(inetaddr), 32 - self.netbits)
+        self.nets.append(n)
 
     def getFWconfigs(self):
-        return '\n'.join(self.ciscofw)
+        sl = []
+        for n in self.nets:
+            sl.extend(n.getCiscoFWConfig(self.fwint, self.dhcpserver))
+        return '\n'.join(sl)
 
