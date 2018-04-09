@@ -2,7 +2,7 @@
 
 from socket import inet_ntoa, inet_aton
 from struct import pack, unpack
-import math
+import attr
 
 def calcDottedNetmask(mask):
     bits = 0xffffffff ^ (1 << 32 - mask) - 1
@@ -14,19 +14,17 @@ def addr2int(addr):
 def int2addr(i):
     return inet_ntoa(pack('>I', i))
 
+@attr.s
 class iacnet(object):
-    def __init__(self, fwint, swint, basenet, netclass, dhcpserver, basevlan=100, netsize=8):
-        self.fwint = fwint
-        self.swint = swint
-        self.basenet = basenet
-        self.netclass = netclass
-        self.basevlan = basevlan
-        self.dhcpserver = dhcpserver
-        assert math.trunc(math.log2(netsize)) == math.log2(netsize)
-        self.netbits = math.trunc(math.log2(netsize))
-
-        self.ciscofw = []
-        self.ciscoswitch = []
+    fwint = attr.ib()
+    swint = attr.ib()
+    basenet = attr.ib()
+    netclass = attr.ib()
+    dhcpserver = attr.ib()
+    basevlan = attr.ib(default=100)
+    netbits = attr.ib(default=3)
+    ciscofw = []
+    ciscoswitch = []
 
     def createVlanInt(self, vlan, name):
         ints= []
