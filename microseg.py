@@ -23,24 +23,37 @@ class network(object):
 
     def _getnet_(self):
         inetaddr = addr2int(self.netaddr)
-        ip = int2addr(inetaddr + 1)
+        fwip = int2addr(inetaddr + 1)
         sbip = int2addr(inetaddr + 2)
+        ip = int2addr(inetaddr + 3)
         mask = calcDottedNetmask(self.netmask)
         return { 'ip' : ip,
+                 'fwip' : fwip,
                  'sbip' : sbip,
                  'mask' : mask,
+                 'desc' : self.desc,
+                 'vlan' : self.vlan,
         }
 
     def getCiscoFWConfig(self, intname, dhcpserver):
+        fargs = self._getnet_()
         ints = []
-        ints.append('interface {}.{}'.format(intname,self.vlan))
-        ints.append('  vlan {}'.format(self.vlan))
-        ints.append('  description {}'.format(self.desc))
-        ints.append('  nameif {}'.format(self.desc))
+        ints.append('interface {}.{}'.format(intname,fargs['vlan']))
+        ints.append('  vlan {vlan}'.format(**fargs))
+        ints.append('  description {desc}'.format(**fargs))
+        ints.append('  nameif {desc}'.format(**fargs))
         ints.append('  dhcprelay server {}'.format(dhcpserver))
-        ints.append('  ip address {ip} {mask} standby {sbip}'.format(**self._getnet_()))
+        ints.append('  ip address {fwip} {mask} standby {sbip}'.format(**fargs))
         ints.append('  exit')
         return ints
+
+    def getDnsmasqConfig(self, leasetime='1h'):
+        confs = []
+        fargs = self._getnet_()
+        fargs['leasetime'] = leasetime
+        confs.append('dhcp-range=vlan{vlan},{ip},{ip},{mask},{leasetime}'.format(**fargs))
+        confs.append('dhcp-options=vlan{vlan},3,{fwip}'.format(**fargs))
+        return confs
 
 
 @attr.s
@@ -66,3 +79,8 @@ class iacnet(object):
             sl.extend(n.getCiscoFWConfig(self.fwint, self.dhcpserver))
         return '\n'.join(sl)
 
+    def getDnsmasqConfigs(self):
+        sl = []
+        for n in self.nets:
+            sl.extend(n.getDnsmasqConfig())
+        return '\n'.join(sl)
