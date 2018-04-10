@@ -69,7 +69,7 @@ class iacnet(object):
 
     def createVlanInt(self, vlan, name):
         ibasenet = addr2int(self.basenet)
-        inetaddr = ibasenet + (vlan - self.basevlan) * self.netbits ** 2
+        inetaddr = ibasenet + (vlan - self.basevlan) * (2 ** self.netbits)
         n = network(vlan, name, int2addr(inetaddr), 32 - self.netbits)
         return n
 
