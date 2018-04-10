@@ -33,12 +33,14 @@ class network(object):
                  'mask' : mask,
                  'desc' : self.desc,
                  'vlan' : self.vlan,
+                 'network' : self.netaddr,
         }
 
     def getCiscoFWConfig(self, intname, dhcpserver):
         fargs = self._getnet_()
         ints = []
         ints.append('interface {}.{}'.format(intname,fargs['vlan']))
+        ints.append('  ! network address {network}/{mask}'.format(**fargs))
         ints.append('  vlan {vlan}'.format(**fargs))
         ints.append('  description {desc}'.format(**fargs))
         ints.append('  nameif {desc}'.format(**fargs))
