@@ -60,11 +60,11 @@ class network(object):
 class iacnet(object):
     fwint = attr.ib()
     swint = attr.ib()
-    basenet = attr.ib()
-    netclass = attr.ib()
     dhcpserver = attr.ib()
-    basevlan = attr.ib(default=100)
-    netbits = attr.ib(default=3)
+    basenet = attr.ib()
+    supernetclass = attr.ib(default=11)  # gives a /21 -- 256 8 IP networks
+    basevlan = attr.ib(default=100) # proxmox starting ID
+    netbits = attr.ib(default=3)    # 2^3=8 ips per network
     nets = []
 
     def createVlanInt(self, vlan, name):
