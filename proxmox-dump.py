@@ -20,7 +20,7 @@ for node in vmnodes:
         machines.extend(pr.get())
 
 for m in machines:
-    n.createVlanInt(int(m['vmid']), m['name'])
+    n.addVlanInt(int(m['vmid']), m['name'])
 
 print ('!*********************** Cisco microseg firewall config ************')
 print (n.getFWconfigs())

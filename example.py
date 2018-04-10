@@ -9,7 +9,7 @@ netlist = ( (100, 'puppet'),
             (104, 'win10') )
 
 for p in netlist:
-    n.createVlanInt(*p)
+    n.addVlanInt(*p)
 
 print ('!*********************** Cisco microseg firewall config ************')
 print (n.getFWconfigs())

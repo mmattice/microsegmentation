@@ -71,6 +71,10 @@ class iacnet(object):
         ibasenet = addr2int(self.basenet)
         inetaddr = ibasenet + (vlan - self.basevlan) * self.netbits ** 2
         n = network(vlan, name, int2addr(inetaddr), 32 - self.netbits)
+        return n
+
+    def addVlanInt(self, vlan, name):
+        n = self.createVlanInt(vlan, name)
         self.nets.append(n)
 
     def getFWconfigs(self):
