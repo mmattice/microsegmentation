@@ -47,6 +47,7 @@ class network(object):
         ints.append('  dhcprelay server {}'.format(dhcpserver))
         ints.append('  ip address {fwip} {mask} standby {sbip}'.format(**fargs))
         ints.append('  exit')
+        ints.append('dhcprelay enable {desc}'.format(**fargs))
         return ints
 
     def getDnsmasqConfig(self, leasetime='1h'):
