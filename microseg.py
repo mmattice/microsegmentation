@@ -55,7 +55,7 @@ class network(object):
         fargs = self._getnet_()
         fargs['leasetime'] = leasetime
         confs.append('dhcp-range=vlan{vlan},{ip},{ip},{mask},{leasetime}'.format(**fargs))
-        confs.append('dhcp-options=vlan{vlan},3,{fwip}'.format(**fargs))
+        confs.append('dhcp-option=vlan{vlan},option:router,{fwip}'.format(**fargs))
         return confs
 
 
