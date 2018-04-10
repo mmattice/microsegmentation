@@ -65,7 +65,7 @@ class iacnet(object):
     swint = attr.ib()
     dhcpserver = attr.ib()
     basenet = attr.ib()
-    supernetclass = attr.ib(default=11)  # gives a /21 -- 256 8 IP networks
+    supernetbits = attr.ib(default=11)  # gives a /21 -- 256 8 IP networks
     basevlan = attr.ib(default=100) # proxmox starting ID
     netbits = attr.ib(default=3)    # 2^3=8 ips per network
     nets = []
@@ -91,3 +91,20 @@ class iacnet(object):
         for n in self.nets:
             sl.extend(n.getDnsmasqConfig())
         return '\n'.join(sl)
+
+    def getFullCiscoFWConfigs(self):
+        count = 2**(self.supernetbits - self.netbits)
+        i = 0
+        while i < count:
+            vlan = self.basevlan + i
+            n = self.createVlanInt(vlan, 'vlan{}'.format(vlan))
+            yield '\n'.join(n.getCiscoFWConfig(self.fwint, self.dhcpserver))
+            i += 1
+
+    def getFullDnsmasqConfigs(self, leasetime='1h'):
+        count = 2**(self.supernetbits - self.netbits)
+        i = 0
+        while i < count:
+            n = self.createVlanInt(self.basevlan + i, '')
+            yield '\n'.join(n.getDnsmasqConfig(leasetime))
+            i += 1
