@@ -2,11 +2,16 @@
 from microseg import iacnet
 from proxmoxer import ProxmoxAPI
 import os
+import sys
 
-proxmox = ProxmoxAPI('proxmox01',
-                     user="{}@pam".format(os.getenv('USER')),
-                     password=os.getenv('proxmoxpass'),
-                     verify_ssl=False)
+try:
+    proxmox = ProxmoxAPI(os.environ.get('proxmoxhost','proxmox01'),
+                         user="{}@pam".format(os.getenv('USER')),
+                         password=os.getenv('proxmoxpass'),
+                         verify_ssl=False)
+except Exception as E:
+    print(sys.exc_info())
+    sys.exit(-1)
 
 n = iacnet('po1', 'po3', '10.42.0.1', '10.100.0.0')
 
