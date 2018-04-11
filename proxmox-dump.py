@@ -30,5 +30,16 @@ for m in machines:
 print ('!*********************** Cisco microseg firewall config ************')
 print (n.getFWconfigs())
 
-print ('#*********************** DNSMasq microseg config *******************')
+c = []
+for x in n.nets:
+    net = x._getnet_()
+    c.append('access-list {desc}_egress extended permit icmp interface {desc} interface {desc}'.format(**net))
+    c.append('access-list {desc}_ingress extended permit icmp interface {desc} interface {desc}'.format(**net))
+    c.append('access-group {desc}_egress in interface {desc}'.format(**net))
+    c.append('access-group {desc}_ingress out interface {desc}'.format(**net))
+    c.append('')
+
+print('\n'.join(c))
+
+print ('\n#*********************** DNSMasq microseg config *******************')
 print (n.getDnsmasqConfigs())
