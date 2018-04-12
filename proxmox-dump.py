@@ -29,16 +29,16 @@ for m in machines:
     n.addVlanInt(int(m['vmid']), m['name'])
 
 print ('!*********************** Cisco microseg firewall config ************')
-print (n.getFWconfigs())
 
 c = []
 for x in n.nets:
     net = x._getnet_()
+    c.extend( x.getCiscoFWConfig(n.fwint, n.dhcpserver) )
     c.append('access-list {desc}_egress extended permit icmp interface {desc} interface {desc}'.format(**net))
     c.append('access-list {desc}_ingress extended permit icmp interface {desc} interface {desc}'.format(**net))
     c.append('access-group {desc}_egress in interface {desc}'.format(**net))
     c.append('access-group {desc}_ingress out interface {desc}'.format(**net))
-    c.append('')
+    c.extend(('',''))
 
 print('\n'.join(c))
 
