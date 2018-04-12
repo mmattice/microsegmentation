@@ -24,6 +24,7 @@ for node in vmnodes:
         pr = getattr(proxmox.nodes(node), mt)
         machines.extend(pr.get())
 
+machines.sort(key=lambda x: int(x['vmid']))
 for m in machines:
     n.addVlanInt(int(m['vmid']), m['name'])
 
